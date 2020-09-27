@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}Quote{% endblock %}
+
+{% block main %}
+{% if quote_details == "" %}
+<form action="/quote" method="post">
+    <div class="form-group">
+        <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"
+            pattern="[a-zA-Z]+" title="Symbol contains only alphabets" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Quote</button>
+</form>
+{% else %}
+<h3>{{ quote_details["name"] }}</h3>
+<p>Symbol: {{ quote_details["symbol"] }}</p>
+<p>Price of one share right now is <strong>{{ quote_details["price"] }}</strong></p>
+{% endif %}
+{% endblock %}

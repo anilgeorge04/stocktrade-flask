@@ -95,11 +95,11 @@ def login():
         session["user_id"]=rows[0]["id"]
 
         # Redirect user to home page
-        flash("Logged in successfully.")
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
+        flash("Existing users login")
         return render_template("login.html")
 
 
@@ -119,7 +119,24 @@ def logout():
 @ login_required
 def quote():
     """Get stock quote."""
-    return apology("TODO")
+    quote_details = ""
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("symbol"):
+            return apology("must provide symbol", 403)
+
+        # Fetch share details with API lookup
+        quote_details = lookup(request.form.get("symbol"))
+        if quote_details == None:
+            return apology("invalid symbol", 403)
+        else:
+            quote_details["price"] = usd(quote_details["price"])
+            return render_template("quote.html", quote_details=quote_details)
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("quote.html", quote_details=quote_details)
 
 
 @ app.route("/register", methods = ["GET", "POST"])
@@ -160,7 +177,7 @@ def register():
                                         hashval = generate_password_hash(request.form.get("password")))
 
         # Login and Redirect user to home page
-        flash("Welcome to CS50 Finance!")
+        flash("Welcome! You're registered now.")
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
