@@ -111,6 +111,7 @@ def logout():
     session.clear()
 
     # Redirect user to login form
+    flash("Logged out successfully.")
     return redirect("/")
 
 
@@ -164,6 +165,7 @@ def register():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
+        flash("Register as a New User")
         return render_template("register.html")
 
 
