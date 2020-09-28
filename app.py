@@ -139,6 +139,8 @@ def quote():
         return render_template("quote.html", quote_details=quote_details)
 
 
+
+
 @ app.route("/register", methods = ["GET", "POST"])
 def register():
     """Register user"""
@@ -149,18 +151,17 @@ def register():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 403)
-
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 403)
-
-        # Ensure confirm password was submitted
-        elif not request.form.get("confirmation"):
-            return apology("must confirm password", 403)
-
+        def provide_check(field):
+            if not request.form.get(field):
+                return apology(f"must provide {field}", 403)
+            else:
+                return None
+        
+        # Ensure username, password and confirmation was submitted
+        result_check = provide_check("username") or provide_check("password") or provide_check("confirmation")
+        if result_check is not None:
+            return result_check
+        
         elif not request.form.get("password") == request.form.get("confirmation"):
             return apology("passwords do not match", 403)
 

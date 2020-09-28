@@ -1,7 +1,8 @@
 # local settings
 .vscode/
-env/
+.venv/
 __pycache__/
 
 # Database in use
 finance.db
+phpliteadmin.php
