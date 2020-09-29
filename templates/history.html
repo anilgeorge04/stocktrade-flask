@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}History{% endblock %}
+
+{% block main %}
+<h1>Transactions<small class="text-muted"> History</small></h1>
+{% if transactions|length < 1 %}
+<h4>📒 No transactions yet!</h4><br>
+<p>Click <a href="/buy">here</a> to get started and buy new shares</p><br>
+{% else %}
+<p class="small text-muted">Under <strong>Shares</strong> column, positive value means stock purchase & negative means stock sale</p><br>
+<table class="table table-hover table-sm">
+    <thead class="thead-light">
+        <tr>
+            <th>Symbol</th>
+            <th>Shares</th>
+            <th>Purchase/Sale Price</th>
+            <th>Transacted on</th>
+        </tr>
+    </thead>
+    {% for sym in transactions %}
+    <tr>
+        <td scope="row">{{ sym.symbol }}</td>
+        <td>{{ sym.shares }}</td>
+        <td>{{ sym.price|usd }}</td>
+        <td>{{ sym.transacted_on }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}
