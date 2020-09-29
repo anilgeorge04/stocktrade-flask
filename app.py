@@ -58,9 +58,9 @@ def index():
 
     # Dynamic fetch Company Name and Current Share Price
     for sym in portfolio:
-        quote = lookup(sym["symbol"])
-        sym["name"] = quote["name"]
-        sym["price"] = quote["price"]
+        quote_details = lookup(sym["symbol"])
+        sym["name"] = quote_details["name"]
+        sym["price"] = quote_details["price"]
         sym["total"] = sym["price"] * sym["shares"]
         overall += sym["total"]
 
@@ -86,19 +86,19 @@ def buy():
         if quote_details == None:
             return apology("invalid symbol", 403)
         else:
-            purchaseprice = quote_details["price"]
+            price = quote_details["price"]
             cash_row = db.execute(
                 "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
             cash = cash_row[0]["cash"]
-            if cash < purchaseprice*shares:
+            if cash < price*shares:
                 return apology("insufficient cash balance", 403)
             else:
-                cash = cash - (purchaseprice*shares)
+                cash = cash - (price*shares)
                 db.execute("UPDATE users SET cash=:cash WHERE id=:id",
                            cash=cash, id=session["user_id"])
-                db.execute("INSERT INTO purchases(symbol, shares, purchaseprice, user_id) \
-                    VALUES(:symbol, :shares, :purchaseprice, :user_id)",
-                           symbol=quote_details["symbol"], shares=shares, purchaseprice=purchaseprice, user_id=session["user_id"])
+                db.execute("INSERT INTO purchases(symbol, shares, price, user_id) \
+                    VALUES(:symbol, :shares, :price, :user_id)",
+                           symbol=quote_details["symbol"], shares=shares, price=price, user_id=session["user_id"])
                 flash("Success: Debited cash and bought stock")
                 return redirect("/")
 
@@ -253,19 +253,22 @@ def sell():
         if quote_details == None:
             return apology("invalid symbol", 403)
         else:
-            purchaseprice = quote_details["price"]
-            cash_row = db.execute(
-                "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
-            cash = cash_row[0]["cash"]
-            if cash < purchaseprice*shares:
-                return apology("insufficient cash balance", 403)
+            share_row = db.execute("SELECT SUM(shares) AS shares FROM purchases \
+                WHERE user_id=:user_id GROUP BY(symbol) HAVING symbol=:symbol",
+                                   user_id=session["user_id"], symbol=quote_details["symbol"])
+            if share_row[0]["shares"] < shares:
+                return apology("not enough shares to sell", 403)
             else:
-                cash = cash - (purchaseprice*shares)
+                price = quote_details["price"]
+                cash_row = db.execute(
+                    "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+                cash = cash_row[0]["cash"]
+                cash = cash + (price*shares)
                 db.execute("UPDATE users SET cash=:cash WHERE id=:id",
                            cash=cash, id=session["user_id"])
-                db.execute("INSERT INTO purchases(symbol, shares, purchaseprice, user_id) \
-                    VALUES(:symbol, :shares, :purchaseprice, :user_id)",
-                           symbol=quote_details["symbol"], shares=shares, purchaseprice=purchaseprice, user_id=session["user_id"])
+                db.execute("INSERT INTO purchases(symbol, shares, price, user_id) \
+                    VALUES(:symbol, -:shares, :price, :user_id)",
+                           symbol=quote_details["symbol"], shares=shares, price=price, user_id=session["user_id"])
                 flash("Success: Stock sold and cash credited")
                 return redirect("/")
 
