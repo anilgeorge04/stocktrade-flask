@@ -6,3 +6,6 @@ __pycache__/
 # Database in use
 finance.db
 phpliteadmin.php
+
+# Local test files
+test.py

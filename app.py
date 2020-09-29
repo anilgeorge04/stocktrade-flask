@@ -42,20 +42,68 @@ if not os.environ.get("API_KEY"):
     raise RuntimeError("API_KEY not set")
 
 
-@app.route("/")
-@login_required
+@ app.route("/")
+@ login_required
 def index():
     """Show portfolio of stocks"""
-    rows = db.execute("SELECT * FROM users WHERE id = :sessid",
-                          sessid=session["user_id"])
-    return apology("Welcome inside", rows[0]["username"])
+
+    # user's portfolio by stock symbol
+    portfolio = db.execute("SELECT symbol, sum(shares) AS shares \
+        FROM purchases WHERE user_id = :user_id GROUP BY(symbol)", user_id=session["user_id"])
+    # current cash & overall portfolio value
+    cash_row = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+    balance = cash_row[0]["cash"]
+    overall = balance
+
+    # Dynamic fetch Company Name and Current Share Price
+    for sym in portfolio:
+        quote = lookup(sym["symbol"])
+        sym["name"] = quote["name"]
+        sym["price"] = quote["price"]
+        sym["total"] = sym["price"] * sym["shares"]
+        overall += sym["total"]
+
+    return render_template("index.html", portfolio=portfolio, balance=balance, overall=overall, username=session["username"], )
 
 
-@ app.route("/buy", methods = ["GET", "POST"])
+@ app.route("/buy", methods=["GET", "POST"])
 @ login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure symbol and shares was submitted
+        if not request.form.get("symbol"):
+            return apology("must provide symbol", 400)
+        elif not request.form.get("shares"):
+            return apology("must provide number of shares", 400)
+        shares = int(request.form.get("shares"))
+
+        # Fetch share details with API lookup
+        quote_details = lookup(request.form.get("symbol"))
+        if quote_details == None:
+            return apology("invalid symbol", 403)
+        else:
+            purchaseprice = quote_details["price"]
+            cash_row = db.execute(
+                "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+            cash = cash_row[0]["cash"]
+            if cash < purchaseprice*shares:
+                return apology("insufficient cash balance", 403)
+            else:
+                cash = cash - (purchaseprice*shares)
+                db.execute("UPDATE users SET cash=:cash WHERE id=:id",
+                           cash=cash, id=session["user_id"])
+                db.execute("INSERT INTO purchases(symbol, shares, purchaseprice, user_id) \
+                    VALUES(:symbol, :shares, :purchaseprice, :user_id)",
+                           symbol=quote_details["symbol"], shares=shares, purchaseprice=purchaseprice, user_id=session["user_id"])
+                flash("Bought successfully!")
+                return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("buy.html")
 
 
 @ app.route("/history")
@@ -65,7 +113,7 @@ def history():
     return apology("TODO")
 
 
-@ app.route("/login", methods = ["GET", "POST"])
+@ app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
 
@@ -77,29 +125,29 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username", 403)
+            return apology("must provide username", 400)
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 403)
+            return apology("must provide password", 400)
 
         # Query database for username
-        rows=db.execute("SELECT * FROM users WHERE username = :username",
-                          username = request.form.get("username"))
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          username=request.form.get("username"))
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
-        session["user_id"]=rows[0]["id"]
+        session["user_id"] = rows[0]["id"]
+        session["username"] = rows[0]["username"]
 
         # Redirect user to home page
         return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        flash("Existing users login")
         return render_template("login.html")
 
 
@@ -115,7 +163,7 @@ def logout():
     return redirect("/")
 
 
-@ app.route("/quote", methods = ["GET", "POST"])
+@ app.route("/quote", methods=["GET", "POST"])
 @ login_required
 def quote():
     """Get stock quote."""
@@ -132,16 +180,13 @@ def quote():
         if quote_details == None:
             return apology("invalid symbol", 403)
         else:
-            quote_details["price"] = usd(quote_details["price"])
             return render_template("quote.html", quote_details=quote_details)
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("quote.html", quote_details=quote_details)
 
 
-
-
-@ app.route("/register", methods = ["GET", "POST"])
+@ app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
 
@@ -153,29 +198,30 @@ def register():
 
         def provide_check(field):
             if not request.form.get(field):
-                return apology(f"must provide {field}", 403)
+                return apology(f"must provide {field}", 400)
             else:
                 return None
-        
+
         # Ensure username, password and confirmation was submitted
-        result_check = provide_check("username") or provide_check("password") or provide_check("confirmation")
+        result_check = provide_check("username") or provide_check(
+            "password") or provide_check("confirmation")
         if result_check is not None:
             return result_check
-        
+
         elif not request.form.get("password") == request.form.get("confirmation"):
             return apology("passwords do not match", 403)
 
         # Query database for username to check if already exists
-        rows=db.execute("SELECT * FROM users WHERE username = :username",
-                          username = request.form.get("username"))
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          username=request.form.get("username"))
         if len(rows) > 0:
             flash("Username not available")
             return apology("select another username", 403)
 
         # Insert new user into DB, returns user ID
-        session["user_id"]=db.execute("INSERT INTO users(username, hash) \
-            VALUES(:username, :hashval)", username = request.form.get("username"),
-                                        hashval = generate_password_hash(request.form.get("password")))
+        session["user_id"] = db.execute("INSERT INTO users(username, hash) \
+            VALUES(:username, :hashval)", username=request.form.get("username"),
+                                        hashval=generate_password_hash(request.form.get("password")))
 
         # Login and Redirect user to home page
         flash("Welcome! You're registered now.")
@@ -187,7 +233,7 @@ def register():
         return render_template("register.html")
 
 
-@ app.route("/sell", methods = ["GET", "POST"])
+@ app.route("/sell", methods=["GET", "POST"])
 @ login_required
 def sell():
     """Sell shares of stock"""
@@ -197,7 +243,7 @@ def sell():
 def errorhandler(e):
     """Handle error"""
     if not isinstance(e, HTTPException):
-        e=InternalServerError()
+        e = InternalServerError()
     return apology(e.name, e.code)
 
 
@@ -207,4 +253,4 @@ for code in default_exceptions:
 
 
 if __name__ == "__main__":
-    app.run(debug = True)
+    app.run(debug=True)

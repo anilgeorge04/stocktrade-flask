@@ -1,15 +1,9 @@
 {% extends "layout.html" %}
-{% block head %}
-    <!-- <script defer src="{{url_for('static', filename='js/register.js')}}"></script> -->
-{% endblock %}
 
-{% block title %}
-Home
-{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block main %}
-Works
-<!-- <h1><small class="text-muted">Presenting</small>{{ username }}'s Portfolio</h1>
+<h1>{{ username }}<small class="text-muted"> Portfolio</small></h1>
 {% if portfolio|length < 1 %}
 <h4>📒 Portfolio is empty</h4>
 <p>Click <a href="/buy">here</a>to buy shares</p><br>
@@ -24,15 +18,23 @@ Works
             <th>Total</th>
         </tr>
     </thead>
-    {% for item in portfolio %}
+    <tfoot class="table-success">
+        <td colspan="4">Portfolio Value</td>
+        <td>{{ overall|usd }}</td>
+    </tfoot>
+    {% for sym in portfolio %}
     <tr>
-        <td>{{ item.symbol }}</td>
-        <td>{{ item.coname }}</td>
-        <td>{{ item.shares }}</td>
-        <td>{{ item.price }}</td>
-        <td>{{ item.total }}</td>
+        <td scope="row">{{ sym.symbol }}</td>
+        <td>{{ sym.name }}</td>
+        <td>{{ sym.shares }}</td>
+        <td>{{ sym.price|usd }}</td>
+        <td>{{ sym.total|usd }}</td>
     </tr>
     {% endfor %}
+    <tr class="table-info">
+        <td colspan="4">Cash Balance</td>
+        <td>{{ balance|usd }}</td>
+    </tr>
 </table>
-{% endif %} -->
+{% endif %}
 {% endblock %}
