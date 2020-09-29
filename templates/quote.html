@@ -14,6 +14,6 @@
 {% else %}
 <h3>{{ quote_details["name"] }}</h3>
 <p>Symbol: {{ quote_details["symbol"] }}</p>
-<p>Price of one share right now is <strong>{{ quote_details["price"] }}</strong></p>
+<p>Price of one share right now is <strong>{{ quote_details["price"]|usd }}</strong></p>
 {% endif %}
 {% endblock %}
