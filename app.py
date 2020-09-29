@@ -51,7 +51,8 @@ def index():
     portfolio = db.execute("SELECT symbol, sum(shares) AS shares \
         FROM purchases WHERE user_id = :user_id GROUP BY(symbol)", user_id=session["user_id"])
     # current cash & overall portfolio value
-    cash_row = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+    cash_row = db.execute(
+        "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
     balance = cash_row[0]["cash"]
     overall = balance
 
@@ -98,7 +99,7 @@ def buy():
                 db.execute("INSERT INTO purchases(symbol, shares, purchaseprice, user_id) \
                     VALUES(:symbol, :shares, :purchaseprice, :user_id)",
                            symbol=quote_details["symbol"], shares=shares, purchaseprice=purchaseprice, user_id=session["user_id"])
-                flash("Bought successfully!")
+                flash("Success: Debited cash and bought stock")
                 return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
@@ -237,7 +238,42 @@ def register():
 @ login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure symbol and shares was submitted
+        if not request.form.get("symbol"):
+            return apology("must provide symbol", 400)
+        elif not request.form.get("shares"):
+            return apology("must provide number of shares", 400)
+        shares = int(request.form.get("shares"))
+
+        # Fetch share details with API lookup
+        quote_details = lookup(request.form.get("symbol"))
+        if quote_details == None:
+            return apology("invalid symbol", 403)
+        else:
+            purchaseprice = quote_details["price"]
+            cash_row = db.execute(
+                "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+            cash = cash_row[0]["cash"]
+            if cash < purchaseprice*shares:
+                return apology("insufficient cash balance", 403)
+            else:
+                cash = cash - (purchaseprice*shares)
+                db.execute("UPDATE users SET cash=:cash WHERE id=:id",
+                           cash=cash, id=session["user_id"])
+                db.execute("INSERT INTO purchases(symbol, shares, purchaseprice, user_id) \
+                    VALUES(:symbol, :shares, :purchaseprice, :user_id)",
+                           symbol=quote_details["symbol"], shares=shares, purchaseprice=purchaseprice, user_id=session["user_id"])
+                flash("Success: Stock sold and cash credited")
+                return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        stocks = db.execute(
+            "SELECT symbol FROM purchases WHERE user_id=:user_id GROUP BY(symbol)", user_id=session["user_id"])
+        return render_template("sell.html", stocks=stocks)
 
 
 def errorhandler(e):
