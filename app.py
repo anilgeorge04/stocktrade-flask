@@ -223,23 +223,23 @@ def logout():
 @ login_required
 def quote():
     """Get stock quote."""
-    quote_details = ""
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
         # Ensure username was submitted
         if not request.form.get("symbol"):
-            return apology("must provide symbol", 403)
+            flash("Please provide Stock Symbol")
+            return render_template("quote.html", quoteDetails=None)
 
         # Fetch share details with API lookup
         quote_details = lookup(request.form.get("symbol"))
         if quote_details == None:
-            return apology("invalid symbol", 403)
+            flash("Invalid Symbol")
         else:
-            return render_template("quote.html", quote_details=quote_details)
+            flash("Details fetched successfully")
+        return render_template("quote.html", quote_details=quote_details)
     # User reached route via GET (as by clicking a link or via redirect)
     else:
-        return render_template("quote.html", quote_details=quote_details)
+        return render_template("quote.html",  quote_details=None)
 
 
 @ app.route("/register", methods=["GET", "POST"])
