@@ -1,4 +1,5 @@
-var newpassword = document.querySelector("#newpassword"), confirmation = document.querySelector("#confirmation");
+var newpassword = document.querySelector("#newpassword"),
+  confirmation = document.querySelector("#confirmation");
 
 function validatePassword() {
   if (newpassword.value != confirmation.value) {

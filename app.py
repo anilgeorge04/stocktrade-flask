@@ -113,8 +113,6 @@ def history():
     """Show history of transactions"""
     transactions = db.execute("SELECT symbol, shares, price, transacted_on FROM purchases \
         WHERE user_id=:user_id", user_id=session["user_id"])
-    if transactions is None:
-        return apology("no transactions here")
     return render_template("history.html", transactions=transactions)
 
 
@@ -129,7 +127,7 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username") or request.form.get("password"):
+        if not request.form.get("username") or not request.form.get("password"):
             flash("Please provide username and password")
             return render_template("login.html")
 
@@ -164,7 +162,7 @@ def changepwd():
 
         def provide_check(field):
             if not request.form.get(field):
-                return apology(f"must provide {field}", 400)
+                return f"Please provide {field}"
             else:
                 return None
 
@@ -172,23 +170,28 @@ def changepwd():
         result_check = provide_check("oldpassword") or provide_check(
             "newpassword") or provide_check("confirmation")
         if result_check is not None:
-            return result_check
-
-        # Ensure new password is different from old password
-        elif request.form.get("oldpassword") == request.form.get("newpassword"):
-            flash("Password change unsuccessful")
-            return apology("new password can't be same as old password", 403)
+            flash(result_check)
+            return render_template("changepwd.html")
 
         # Ensure new password and confirmation match
         elif not request.form.get("newpassword") == request.form.get("confirmation"):
-            return apology("password confirmation does not match", 403)
+            flash("New password and confirmation do not match. Try again.")
+            return render_template("changepwd.html")
+
+        # -- until above, all checks performed within HTML and JS --
+        # placed above for redundancy when JavaScript is disabled
+
+        # Ensure new password is different from old password
+        elif request.form.get("oldpassword") == request.form.get("newpassword"):
+            flash("New password can't be same as old password. Try again.")
+            return render_template("changepwd.html")
 
         # Check if old password is valid
         oldhash = db.execute("SELECT hash FROM users WHERE id = :id",
                              id=session["user_id"])
         if not check_password_hash(oldhash[0]["hash"], request.form.get("oldpassword")):
-            flash("Password change unsuccessful")
-            return apology("invalid old password", 403)
+            flash("Unsuccessful: Invalid old password")
+            return render_template("changepwd.html")
 
         # Update password in DB
         db.execute("UPDATE users SET hash=:hashval WHERE id=:id",

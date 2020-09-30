@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block head %}
-<script defer src="{{url_for('static', filename='js/change.js')}}"></script>
+<script defer src="{{url_for('static', filename='js/changepwd.js')}}"></script>
 {% endblock %}
 
 {% block title %}Change Password{% endblock %}
@@ -19,7 +19,8 @@
     <div class="form-group">
         <input class="form-control" name="newpassword" id="newpassword" placeholder="New Password" type="password"
             pattern="(?=.*\d)(?=.*[a-zA-Z]).{6,12}"
-            title="Must contain at least one number, one alphabet and between 6-12 characters" required>
+            title="Must not be the same as old password. Must contain at least one number, one alphabet. Must have 6-12 characters."
+            required>
     </div>
     <div class="form-group">
         <input class="form-control" name="confirmation" id="confirmation" placeholder="Confirm New Password"
