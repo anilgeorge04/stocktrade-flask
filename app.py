@@ -117,6 +117,7 @@ def history():
         return apology("no transactions here")
     return render_template("history.html", transactions=transactions)
 
+
 @ app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -153,6 +154,14 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+
+
+@ app.route("/changepwd")
+@ login_required
+def changepwd():
+    """Change password"""
+
+    return apology("To-do", 403)
 
 
 @ app.route("/logout")
