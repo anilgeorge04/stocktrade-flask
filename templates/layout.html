@@ -36,14 +36,14 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Manage {{ session.username }}
+                        {{ session.username }} Account
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/history">Transaction History</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="/changepwd">Change Password</a>
-                        <a class="dropdown-item" href="/logout">Log Out</a>
-                    </div>
+                    <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/history">Transaction History</a></li>
+                        <li class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/changepwd">Change Password</a></li>
+                        <li><a class="dropdown-item" href="/logout">Log Out</a></li>
+                    </ul>
                 </li>
             </ul>
             {% else %}

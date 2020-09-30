@@ -48,8 +48,8 @@ def index():
     """Show portfolio of stocks"""
 
     # user's portfolio by stock symbol
-    portfolio = db.execute("SELECT symbol, sum(shares) AS shares \
-        FROM purchases WHERE user_id = :user_id GROUP BY(symbol)", user_id=session["user_id"])
+    portfolio = db.execute(
+        "SELECT symbol, sum(shares) AS shares FROM purchases WHERE user_id = :user_id GROUP BY(symbol)", user_id=session["user_id"])
     # current cash & overall portfolio value
     cash_row = db.execute(
         "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
@@ -129,12 +129,9 @@ def login():
     if request.method == "POST":
 
         # Ensure username was submitted
-        if not request.form.get("username"):
-            return apology("must provide username", 400)
-
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return apology("must provide password", 400)
+        if not request.form.get("username") or request.form.get("password"):
+            flash("Please provide username and password")
+            return render_template("login.html")
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = :username",
@@ -142,7 +139,8 @@ def login():
 
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return apology("invalid username and/or password", 403)
+            flash("Invalid username and/or password.")
+            return render_template("login.html")
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -156,12 +154,54 @@ def login():
         return render_template("login.html")
 
 
-@ app.route("/changepwd")
+@ app.route("/changepwd", methods=["GET", "POST"])
 @ login_required
 def changepwd():
     """Change password"""
 
-    return apology("To-do", 403)
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        def provide_check(field):
+            if not request.form.get(field):
+                return apology(f"must provide {field}", 400)
+            else:
+                return None
+
+        # Ensure old & new password and confirmation was submitted
+        result_check = provide_check("oldpassword") or provide_check(
+            "newpassword") or provide_check("confirmation")
+        if result_check is not None:
+            return result_check
+
+        # Ensure new password is different from old password
+        elif request.form.get("oldpassword") == request.form.get("newpassword"):
+            flash("Password change unsuccessful")
+            return apology("new password can't be same as old password", 403)
+
+        # Ensure new password and confirmation match
+        elif not request.form.get("newpassword") == request.form.get("confirmation"):
+            return apology("password confirmation does not match", 403)
+
+        # Check if old password is valid
+        oldhash = db.execute("SELECT hash FROM users WHERE id = :id",
+                             id=session["user_id"])
+        if not check_password_hash(oldhash[0]["hash"], request.form.get("oldpassword")):
+            flash("Password change unsuccessful")
+            return apology("invalid old password", 403)
+
+        # Update password in DB
+        db.execute("UPDATE users SET hash=:hashval WHERE id=:id",
+                   id=session["user_id"], hashval=generate_password_hash(request.form.get("newpassword")))
+
+        # Login and Redirect user to home page
+        flash("Password changed successfully!")
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        flash("Choose a new password")
+        return render_template("changepwd.html")
 
 
 @ app.route("/logout")
@@ -222,7 +262,7 @@ def register():
             return result_check
 
         elif not request.form.get("password") == request.form.get("confirmation"):
-            return apology("passwords do not match", 403)
+            return apology("password confirmation does not match", 403)
 
         # Query database for username to check if already exists
         rows = db.execute("SELECT * FROM users WHERE username = :username",
