@@ -85,7 +85,8 @@ def buy():
         # Fetch share details with API lookup
         quote_details = lookup(request.form.get("symbol"))
         if quote_details == None:
-            return apology("invalid symbol", 403)
+            flash("Invalid symbol!")
+            return redirect("/buy")
         else:
             price = quote_details["price"]
             cash_row = db.execute(
@@ -100,7 +101,7 @@ def buy():
                 db.execute("INSERT INTO purchases(symbol, shares, price, user_id) \
                     VALUES(:symbol, :shares, :price, :user_id)",
                            symbol=quote_details["symbol"], shares=shares, price=price, user_id=session["user_id"])
-                flash("Success: Debited cash and bought stock")
+                flash("Success: Purchased stock and debited cash")
                 return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)

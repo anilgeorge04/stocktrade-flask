@@ -18,7 +18,7 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-md navbar-light bg-light border">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark border">
         <a class="navbar-brand" href="/"><span class="blue">C</span><span class="red">$</span><span
                 class="yellow">5</span><span class="green">0</span> <span class="blue">Finance</span></a>
         <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
@@ -28,11 +28,14 @@
         <div class="collapse navbar-collapse" id="navbar">
             {% if session.user_id %}
             <ul class="navbar-nav mr-auto mt-2">
-                <li class="nav-item"><a class="nav-link" href="/quote">Quote</a></li>
                 <li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li>
                 <li class="nav-item"><a class="nav-link" href="/sell">Sell</a></li>
             </ul>
             <ul class="navbar-nav ml-auto mt-2">
+                <form action="/quote" method="post" class="form-inline my-2 my-lg-0">
+                    <input autocomplete="off" class="form-control mr-sm-2" name="symbol" type="search" placeholder="Stock Symbol" aria-label="Stock Symbol" pattern="[a-zA-Z]+" title="Symbol contains only alphabets">
+                    <button class="btn btn-sm btn-outline-info my-2 my-sm-0" type="submit">Find Quote</button>
+                </form>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

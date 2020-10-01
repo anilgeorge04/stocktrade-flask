@@ -7,8 +7,8 @@
 {% if portfolio|length < 1 %}
 <h4>📒 No shares here!</h4><br>
 <p>Click <a href="/buy">here</a> to buy new shares</p><br>
-<p class="bg-light">Cash Balance: {{ balance|usd }}</p>
-<p class="bg-dark text-white">Overall Portfolio Value: {{ overall|usd }}</p>
+<p class="bg-light text-black-50">Cash Balance: {{ balance|usd }}</p>
+<p class="bg-dark text-white-50">Overall Portfolio Value: {{ overall|usd }}</p>
 {% else %}
 <table class="table table-hover table-sm">
     <thead class="thead-dark">
