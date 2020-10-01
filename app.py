@@ -119,6 +119,12 @@ def history():
     return render_template("history.html", transactions=transactions)
 
 
+@ app.route("/about")
+def about():
+    """About the app"""
+    return render_template("about.html")
+
+
 @ app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -152,6 +158,7 @@ def login():
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
+        flash("Existing users")
         return render_template("login.html")
 
 
