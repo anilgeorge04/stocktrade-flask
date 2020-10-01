@@ -92,10 +92,11 @@ def buy():
             cash_row = db.execute(
                 "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
             cash = cash_row[0]["cash"]
-            if cash < price*shares:
-                return apology("insufficient cash balance", 403)
+            cash = cash - (price*shares)
+            if cash < 0:
+                flash(f"Sorry! You are short by ${-cash:} to make this purchase.")
+                return redirect("/buy")
             else:
-                cash = cash - (price*shares)
                 db.execute("UPDATE users SET cash=:cash WHERE id=:id",
                            cash=cash, id=session["user_id"])
                 db.execute("INSERT INTO purchases(symbol, shares, price, user_id) \
