@@ -49,7 +49,8 @@ def index():
 
     # user's portfolio by stock symbol
     portfolio = db.execute(
-        "SELECT symbol, sum(shares) AS shares FROM purchases WHERE user_id = :user_id GROUP BY(symbol)", user_id=session["user_id"])
+        "SELECT symbol, SUM(shares) AS shares FROM purchases WHERE user_id = :user_id GROUP BY(symbol) HAVING SUM(shares) > 0",
+        user_id=session["user_id"])
     # current cash & overall portfolio value
     cash_row = db.execute(
         "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
@@ -252,27 +253,21 @@ def register():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        def provide_check(field):
-            if not request.form.get(field):
-                return apology(f"must provide {field}", 400)
-            else:
-                return None
-
         # Ensure username, password and confirmation was submitted
-        result_check = provide_check("username") or provide_check(
-            "password") or provide_check("confirmation")
-        if result_check is not None:
-            return result_check
+        if not request.form.get("username") or not request.form.get("password") or not request.form.get("confirmation"):
+            flash("Please fill all required fields")
+            return render_template("register.html")
 
         elif not request.form.get("password") == request.form.get("confirmation"):
-            return apology("password confirmation does not match", 403)
+            flash("New password and Confirmation do not match. Try again.")
+            return render_template("register.html")
 
         # Query database for username to check if already exists
         rows = db.execute("SELECT * FROM users WHERE username = :username",
                           username=request.form.get("username"))
         if len(rows) > 0:
-            flash("Username not available")
-            return apology("select another username", 403)
+            flash("Username not available. Try another one.")
+            return render_template("register.html")
 
         # Insert new user into DB, returns user ID
         session["user_id"] = db.execute("INSERT INTO users(username, hash) \
@@ -296,41 +291,45 @@ def sell():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-        # Ensure symbol and shares was submitted
-        if not request.form.get("symbol"):
-            return apology("must provide symbol", 400)
-        elif not request.form.get("shares"):
-            return apology("must provide number of shares", 400)
-        shares = int(request.form.get("shares"))
+        # Ensure symbol and shares was submitted (HTML does this check too)
+        symbol_request = request.form.get("symbol")
+        if not symbol_request or not request.form.get("shares"):
+            flash("Please provide symbol and number of shares")
+            return redirect("/sell")
+        shares_request = int(request.form.get("shares"))
 
         # Fetch share details with API lookup
-        quote_details = lookup(request.form.get("symbol"))
+        quote_details = lookup(symbol_request)
         if quote_details == None:
-            return apology("invalid symbol", 403)
+            flash("Invalid symbol. Check and try again.")
+            return redirect("/sell")
         else:
             share_row = db.execute("SELECT SUM(shares) AS shares FROM purchases \
                 WHERE user_id=:user_id GROUP BY(symbol) HAVING symbol=:symbol",
                                    user_id=session["user_id"], symbol=quote_details["symbol"])
-            if share_row[0]["shares"] < shares:
-                return apology("not enough shares to sell", 403)
+            shares_held = share_row[0]["shares"]
+            if shares_held < shares_request:
+                flash(f"Sorry! You only have {shares_held:} share(s) of {symbol_request:}. \
+                    Cannot sell {shares_request:} share(s).")
+                return redirect("/sell")
             else:
                 price = quote_details["price"]
                 cash_row = db.execute(
                     "SELECT cash FROM users WHERE id=:id", id=session["user_id"])
                 cash = cash_row[0]["cash"]
-                cash = cash + (price*shares)
+                cash = cash + (price*shares_request)
                 db.execute("UPDATE users SET cash=:cash WHERE id=:id",
                            cash=cash, id=session["user_id"])
                 db.execute("INSERT INTO purchases(symbol, shares, price, user_id) \
                     VALUES(:symbol, -:shares, :price, :user_id)",
-                           symbol=quote_details["symbol"], shares=shares, price=price, user_id=session["user_id"])
+                           symbol=quote_details["symbol"], shares=shares_request, price=price, user_id=session["user_id"])
                 flash("Success: Stock sold and cash credited")
                 return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         stocks = db.execute(
-            "SELECT symbol FROM purchases WHERE user_id=:user_id GROUP BY(symbol)", user_id=session["user_id"])
+            "SELECT symbol FROM purchases WHERE user_id=:user_id GROUP BY(symbol) HAVING SUM(shares) > 0", user_id=session["user_id"])
         return render_template("sell.html", stocks=stocks)
 
 
