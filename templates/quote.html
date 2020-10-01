@@ -15,6 +15,7 @@
 <h3>{{ quote_details["name"] }}</h3>
 <p>Symbol: {{ quote_details["symbol"] }}</p>
 <p>Price of one share right now is <strong>{{ quote_details["price"]|usd }}</strong></p><br>
-<a href="/quote">Get another stock quote</a>
+<a href="/quote">Get another stock quote</a><br>
+<p>Navigate above to Buy or Sell a stock</p>
 {% endif %}
 {% endblock %}
