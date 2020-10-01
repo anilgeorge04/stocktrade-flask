@@ -21,7 +21,7 @@ Light-weight web application built using Python's Flask web framework. Uses Boot
 
 ### For Developers
 1. Clone the repository
-2. Run manage.py to initialize the SQLite database "finance.db" with the "users" and "purchases" tables. You can alter the default cash balance here (currently set to $10,000).
+2. Create an empty "finance.db" file and run manage.py to initialize it as a SQLite database with "users" and "purchases" tables. You can alter the default cash balance here (currently set to $10,000).
 3. Register at [IEX](https://www.iexcloud.io/) and get a token for your API calls to fetch Stock Data from IEX. More details about API [here](https://iexcloud.io/docs/api/). 
 4. Export the API KEY in your environment before running the Flask App. Example: `export API_KEY=<token>`
 5. Run the flask app with `flask run`
