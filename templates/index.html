@@ -5,8 +5,10 @@
 {% block main %}
 <h1>{{ username }}<small class="text-muted"> Portfolio</small></h1>
 {% if portfolio|length < 1 %}
-<h4>📒 Get started!</h4><br>
+<h4>📒 No shares here!</h4><br>
 <p>Click <a href="/buy">here</a> to buy new shares</p><br>
+<p class="bg-light">Cash Balance: {{ balance|usd }}</p>
+<p class="bg-dark text-white">Overall Portfolio Value: {{ overall|usd }}</p>
 {% else %}
 <table class="table table-hover table-sm">
     <thead class="thead-dark">
