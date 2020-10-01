@@ -65,7 +65,7 @@ def index():
         sym["total"] = sym["price"] * sym["shares"]
         overall += sym["total"]
 
-    return render_template("index.html", portfolio=portfolio, balance=balance, overall=overall, username=session["username"], )
+    return render_template("index.html", portfolio=portfolio, balance=balance, overall=overall, username=session["username"])
 
 
 @ app.route("/buy", methods=["GET", "POST"])
@@ -271,10 +271,11 @@ def register():
             flash("Username not available. Try another one.")
             return render_template("register.html")
 
-        # Insert new user into DB, returns user ID
+        # Insert new user into DB, returns user ID (CS50 special)
         session["user_id"] = db.execute("INSERT INTO users(username, hash) \
             VALUES(:username, :hashval)", username=request.form.get("username"),
                                         hashval=generate_password_hash(request.form.get("password")))
+        session["username"] = request.form.get("username")
 
         # Login and Redirect user to home page
         flash("Welcome! You're registered now.")
