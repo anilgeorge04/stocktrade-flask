@@ -14,12 +14,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     {% block head %}{% endblock %}
-    <title>C$50 Finance: {% block title %}{% endblock %}</title>
+    <title>Train to Trade: {% block title %}{% endblock %}</title>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark border">
+
+        {% if session.user_id %}
         <a class="navbar-brand" href="/"><span class="green">Tra<span class="red">in</span> <span class="blue">to</span> <span class="green">Tra</span><span class="red">de</span></a>
+        {% else %}
+        <a class="navbar-brand" href="/about"><span class="green">Tra<span class="red">in</span> <span class="blue">to</span> <span class="green">Tra</span><span class="red">de</span></a>
+        {% endif %}
         <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
             data-target="#navbar" data-toggle="collapse" type="button">
             <span class="navbar-toggler-icon"></span>
