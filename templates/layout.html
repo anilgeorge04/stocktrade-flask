@@ -3,6 +3,16 @@
 <html lang="en">
 
 <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-178283229-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'UA-178283229-2');
+    </script>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -21,9 +31,11 @@
     <nav class="navbar navbar-expand-md navbar-dark bg-dark border">
 
         {% if session.user_id %}
-        <a class="navbar-brand" href="/"><span class="green">Tra<span class="red">in</span> <span class="blue">to</span> <span class="green">Tra</span><span class="red">de</span></a>
+        <a class="navbar-brand" href="/"><span class="green">Tra<span class="red">in</span> <span class="blue">to</span>
+                <span class="green">Tra</span><span class="red">de</span></a>
         {% else %}
-        <a class="navbar-brand" href="/about"><span class="green">Tra<span class="red">in</span> <span class="blue">to</span> <span class="green">Tra</span><span class="red">de</span></a>
+        <a class="navbar-brand" href="/about"><span class="green">Tra<span class="red">in</span> <span
+                    class="blue">to</span> <span class="green">Tra</span><span class="red">de</span></a>
         {% endif %}
         <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
             data-target="#navbar" data-toggle="collapse" type="button">
@@ -38,7 +50,9 @@
             </ul>
             <ul class="navbar-nav ml-auto mt-2">
                 <form action="/quote" method="post" class="form-inline my-2 my-lg-0">
-                    <input autocomplete="off" class="form-control mr-sm-2" name="symbol" type="search" placeholder="Stock Symbol" aria-label="Stock Symbol" pattern="[a-zA-Z]+" title="Symbol contains only alphabets">
+                    <input autocomplete="off" class="form-control mr-sm-2" name="symbol" type="search"
+                        placeholder="Stock Symbol" aria-label="Stock Symbol" pattern="[a-zA-Z]+"
+                        title="Symbol contains only alphabets">
                     <button class="btn btn-sm btn-outline-info my-2 my-sm-0" type="submit">Find Quote</button>
                 </form>
                 <li class="nav-item dropdown">
