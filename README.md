@@ -1,8 +1,9 @@
-# Train to Trade
+# FIT INVESTORS
+## Train to Trade 
 
 A real-time practice ground for trading* in any listed US stock.
 
-The best way to learn is by doing. The **Train to Trade** simulation helps you buy and sell shares, and manage a stock portfolio*.  Seasoned investors can use **Train to Trade** as their sandbox account to make experimental bets with their portfolio. For investors new to stock investing, it prepares you first hand for the movements of a stock market.
+The best way to learn is by doing. The **FIT INVESTORS** simulation helps you buy and sell shares, and manage a stock portfolio*.  Seasoned investors can use **FIT INVESTORS** as their sandbox account to make experimental bets with their portfolio. For investors new to stock investing, it prepares you first hand for the movements of a stock market.
 
 *NO real money involved. Designed purely for hands-on learning and practice. Uses US Stocks data provided by IEX.
 No email required to explore and use the app. Your password is hashed. But, use any available dummy username and password. Preferably one that you don't use for anything else.
